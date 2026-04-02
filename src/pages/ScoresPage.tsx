@@ -138,8 +138,8 @@ export function ScoresPage() {
       : 'https://kashmirrangers.play-cricket.com'
 
   const teamUrl = teamId ? `${clubBaseUrl}/Teams/${teamId}` : clubBaseUrl
-  const fixturesUrl = `${clubBaseUrl}/website/fixture_results?result_type=fixtures`
-  const resultsUrl = `${clubBaseUrl}/website/fixture_results?result_type=results`
+  const fixturesUrl = `${clubBaseUrl}/Matches?tab=Fixture`
+  const resultsUrl = `${clubBaseUrl}/Matches?tab=Result`
   const tableUrl = `${clubBaseUrl}/website/division_tables`
 
   // Play-Cricket API v2 — live data if token + numeric site ID configured
