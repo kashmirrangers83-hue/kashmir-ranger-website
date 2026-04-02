@@ -18,6 +18,7 @@ export function Navbar() {
     { to: '/scores', label: 'Scores & Tables' },
     { to: '/officials', label: 'Officials' },
     { to: '/sponsors', label: 'Sponsors' },
+    { to: '/gallery', label: 'Gallery' },
     { to: '/contact', label: 'Contact' }
   ]
 

@@ -56,6 +56,13 @@ The application requires Firebase integration, authentication, dynamic CMS capab
 - Progression: User fills form → Validation → Display success message → Show social links from Firestore
 - Success criteria: Form validation works, social links are dynamic, professional layout
 
+**Gallery Page**
+- Functionality: Grid display of club photos from matches, training sessions, and events
+- Purpose: Visual showcase of club activities and team spirit to engage visitors and build community
+- Trigger: Navigation click to /gallery
+- Progression: Navigation → Load photos from KV store → Display responsive grid → Show captions
+- Success criteria: Photos load efficiently with lazy loading, responsive grid layout, empty state with engaging message, captions display properly
+
 ### Admin Panel Features ("Independence")
 
 **Admin Authentication**
@@ -92,6 +99,13 @@ The application requires Firebase integration, authentication, dynamic CMS capab
 - Trigger: Click "Content" in admin panel
 - Progression: Load current content → Edit in textarea → Preview (optional) → Save → Update Firestore
 - Success criteria: Formatting preserved, line breaks work, updates appear immediately
+
+**Gallery Manager**
+- Functionality: Add photos to gallery by providing image URLs with optional captions, view all gallery photos in a grid, and remove photos
+- Purpose: Complete control over gallery content without technical knowledge or file uploads
+- Trigger: Click "Gallery" tab in admin panel
+- Progression: View gallery grid → Click "Add Photo" → Enter image URL and optional caption → Save to KV store → Photo appears in public gallery → Admin can remove photos individually
+- Success criteria: Photos add instantly, captions save correctly, removal works immediately, empty state guides admin to add first photo
 
 ## Edge Case Handling
 

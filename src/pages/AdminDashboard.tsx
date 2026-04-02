@@ -9,8 +9,16 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { toast } from 'sonner'
-import { SignOut, Gear, FileText, Users, Star, Info } from '@phosphor-icons/react'
+import { SignOut, Gear, FileText, Users, Star, Info, Image, Plus, Trash } from '@phosphor-icons/react'
+
+interface GalleryPhoto {
+  id: string
+  url: string
+  caption?: string
+  uploadedAt: number
+}
 
 export function AdminDashboard() {
   const [auth, setAuth] = useKV<AuthState>('auth-state', { isAuthenticated: false })
@@ -18,6 +26,11 @@ export function AdminDashboard() {
   const [content, setContent] = useKV<Content>('content', defaultContent)
   const [officials, setOfficials] = useKV<Official[]>('officials', defaultOfficials)
   const [sponsors, setSponsors] = useKV<Sponsor[]>('sponsors', defaultSponsors)
+  const [photos, setPhotos] = useKV<GalleryPhoto[]>('gallery-photos', [])
+  
+  const [newPhotoUrl, setNewPhotoUrl] = useState('')
+  const [newPhotoCaption, setNewPhotoCaption] = useState('')
+  const [isAddPhotoOpen, setIsAddPhotoOpen] = useState(false)
   
   const navigate = useNavigate()
 
@@ -40,6 +53,31 @@ export function AdminDashboard() {
     toast.success('Content saved successfully!')
   }
 
+  const handleAddPhoto = () => {
+    if (!newPhotoUrl.trim()) {
+      toast.error('Please enter a photo URL')
+      return
+    }
+
+    const newPhoto: GalleryPhoto = {
+      id: Date.now().toString(),
+      url: newPhotoUrl,
+      caption: newPhotoCaption || undefined,
+      uploadedAt: Date.now()
+    }
+
+    setPhotos((currentPhotos) => [...(currentPhotos || []), newPhoto])
+    setNewPhotoUrl('')
+    setNewPhotoCaption('')
+    setIsAddPhotoOpen(false)
+    toast.success('Photo added to gallery!')
+  }
+
+  const handleDeletePhoto = (id: string) => {
+    setPhotos((currentPhotos) => (currentPhotos || []).filter(photo => photo.id !== id))
+    toast.success('Photo removed from gallery')
+  }
+
   return (
     <div className="min-h-screen bg-muted/30">
       <nav className="bg-primary text-white p-4">
@@ -54,7 +92,7 @@ export function AdminDashboard() {
 
       <div className="container mx-auto px-4 py-8">
         <Tabs defaultValue="settings" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 max-w-3xl">
+          <TabsList className="grid w-full grid-cols-5 max-w-4xl">
             <TabsTrigger value="settings" className="gap-2">
               <Gear size={20} />
               Settings
@@ -70,6 +108,10 @@ export function AdminDashboard() {
             <TabsTrigger value="sponsors" className="gap-2">
               <Star size={20} />
               Sponsors
+            </TabsTrigger>
+            <TabsTrigger value="gallery" className="gap-2">
+              <Image size={20} />
+              Gallery
             </TabsTrigger>
           </TabsList>
 
@@ -413,6 +455,101 @@ export function AdminDashboard() {
                 <Button onClick={() => toast.success('Sponsors updated!')} className="w-full mt-6 uppercase tracking-wide font-semibold">
                   Save Sponsors
                 </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="gallery">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-2xl uppercase tracking-wide flex justify-between items-center">
+                  <span>Gallery Manager</span>
+                  <Dialog open={isAddPhotoOpen} onOpenChange={setIsAddPhotoOpen}>
+                    <DialogTrigger asChild>
+                      <Button className="gap-2">
+                        <Plus size={20} weight="bold" />
+                        Add Photo
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Add Photo to Gallery</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4 mt-4">
+                        <div>
+                          <Label htmlFor="photoUrl" className="text-base font-semibold">Photo URL</Label>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Enter the URL of the image you want to add to the gallery
+                          </p>
+                          <Input
+                            id="photoUrl"
+                            placeholder="https://example.com/photo.jpg"
+                            value={newPhotoUrl}
+                            onChange={(e) => setNewPhotoUrl(e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="photoCaption" className="text-base font-semibold">Caption (Optional)</Label>
+                          <Input
+                            id="photoCaption"
+                            placeholder="Match vs XYZ Cricket Club"
+                            value={newPhotoCaption}
+                            onChange={(e) => setNewPhotoCaption(e.target.value)}
+                          />
+                        </div>
+                        <Button onClick={handleAddPhoto} className="w-full uppercase tracking-wide font-semibold">
+                          Add to Gallery
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {(!photos || photos.length === 0) ? (
+                  <div className="text-center py-12">
+                    <div className="w-24 h-24 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center">
+                      <Image size={48} weight="light" className="text-muted-foreground" />
+                    </div>
+                    <h3 className="text-xl font-bold mb-2">No Photos Yet</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Click "Add Photo" above to start building your gallery
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-muted-foreground mb-6">
+                      Currently displaying {photos.length} photo{photos.length !== 1 ? 's' : ''} in the gallery
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {photos.map((photo) => (
+                        <Card key={photo.id} className="overflow-hidden">
+                          <div className="aspect-square relative overflow-hidden bg-muted">
+                            <img
+                              src={photo.url}
+                              alt={photo.caption || 'Gallery photo'}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <CardContent className="p-4">
+                            {photo.caption && (
+                              <p className="text-sm mb-3">{photo.caption}</p>
+                            )}
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleDeletePhoto(photo.id)}
+                              className="w-full gap-2"
+                            >
+                              <Trash size={16} weight="bold" />
+                              Remove Photo
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
