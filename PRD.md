@@ -101,11 +101,11 @@ The application requires Firebase integration, authentication, dynamic CMS capab
 - Success criteria: Formatting preserved, line breaks work, updates appear immediately
 
 **Gallery Manager**
-- Functionality: Add photos to gallery by providing image URLs with optional captions, view all gallery photos in a grid, and remove photos
-- Purpose: Complete control over gallery content without technical knowledge or file uploads
+- Functionality: Upload photos to gallery via file upload or image URL with optional captions, view all gallery photos in a draggable grid, reorder photos via drag-and-drop, and remove photos
+- Purpose: Complete control over gallery content with flexible upload options and intuitive organization
 - Trigger: Click "Gallery" tab in admin panel
-- Progression: View gallery grid → Click "Add Photo" → Enter image URL and optional caption → Save to KV store → Photo appears in public gallery → Admin can remove photos individually
-- Success criteria: Photos add instantly, captions save correctly, removal works immediately, empty state guides admin to add first photo
+- Progression: View gallery grid → Click "Add Photo" → Choose upload method (file/URL) → Select/enter image → Add optional caption → Save to KV store → Photo appears in public gallery → Drag photos to reorder → Admin can remove photos individually
+- Success criteria: File uploads convert to data URLs and save correctly, URL-based uploads work, drag-and-drop reordering is smooth with visual feedback, photos display in custom order on public gallery, removal works immediately, preview shows before adding, file size validation (5MB max), empty state guides admin to add first photo
 
 ## Edge Case Handling
 

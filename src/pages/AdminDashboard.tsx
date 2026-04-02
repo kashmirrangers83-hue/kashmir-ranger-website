@@ -10,8 +10,9 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { toast } from 'sonner'
-import { SignOut, Gear, FileText, Users, Star, Info, Image as ImageIcon, Plus, Trash, DotsSixVertical, House } from '@phosphor-icons/react'
+import { SignOut, Gear, FileText, Users, Star, Info, Image as ImageIcon, Plus, Trash, DotsSixVertical, House, UploadSimple } from '@phosphor-icons/react'
 
 interface GalleryPhoto {
   id: string
@@ -45,6 +46,9 @@ export function AdminDashboard() {
   const [isAddPhotoOpen, setIsAddPhotoOpen] = useState(false)
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
+  const [uploadMethod, setUploadMethod] = useState<'file' | 'url'>('file')
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   
   const navigate = useNavigate()
 
@@ -93,22 +97,59 @@ export function AdminDashboard() {
     toast.success('Content saved successfully!')
   }
 
-  const handleAddPhoto = () => {
-    if (!newPhotoUrl.trim()) {
-      toast.error('Please enter a photo URL')
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file')
       return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be smaller than 5MB')
+      return
+    }
+
+    setSelectedFile(file)
+
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setPreviewUrl(reader.result as string)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleAddPhoto = async () => {
+    let photoUrl = ''
+
+    if (uploadMethod === 'file') {
+      if (!selectedFile || !previewUrl) {
+        toast.error('Please select a photo to upload')
+        return
+      }
+      photoUrl = previewUrl
+    } else {
+      if (!newPhotoUrl.trim()) {
+        toast.error('Please enter a photo URL')
+        return
+      }
+      photoUrl = newPhotoUrl
     }
 
     const newPhoto: GalleryPhoto = {
       id: Date.now().toString(),
-      url: newPhotoUrl,
+      url: photoUrl,
       caption: newPhotoCaption || undefined,
       uploadedAt: Date.now()
     }
 
     setPhotos((currentPhotos) => [...(currentPhotos || []), newPhoto])
+    
     setNewPhotoUrl('')
     setNewPhotoCaption('')
+    setSelectedFile(null)
+    setPreviewUrl(null)
     setIsAddPhotoOpen(false)
     toast.success('Photo added to gallery!')
   }
@@ -603,23 +644,67 @@ export function AdminDashboard() {
                         Add Photo
                       </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="max-w-xl">
                       <DialogHeader>
                         <DialogTitle>Add Photo to Gallery</DialogTitle>
                       </DialogHeader>
-                      <div className="space-y-4 mt-4">
-                        <div>
-                          <Label htmlFor="photoUrl" className="text-base font-semibold">Photo URL</Label>
-                          <p className="text-sm text-muted-foreground mb-2">
-                            Enter the URL of the image you want to add to the gallery
-                          </p>
-                          <Input
-                            id="photoUrl"
-                            placeholder="https://example.com/photo.jpg"
-                            value={newPhotoUrl}
-                            onChange={(e) => setNewPhotoUrl(e.target.value)}
-                          />
-                        </div>
+                      <div className="space-y-6 mt-4">
+                        <RadioGroup value={uploadMethod} onValueChange={(value) => setUploadMethod(value as 'file' | 'url')} className="flex gap-4">
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="file" id="file" />
+                            <Label htmlFor="file" className="cursor-pointer font-medium">Upload Photo</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="url" id="url" />
+                            <Label htmlFor="url" className="cursor-pointer font-medium">Use Image URL</Label>
+                          </div>
+                        </RadioGroup>
+
+                        {uploadMethod === 'file' ? (
+                          <div className="space-y-4">
+                            <div>
+                              <Label htmlFor="photoFile" className="text-base font-semibold">Select Photo</Label>
+                              <p className="text-sm text-muted-foreground mb-3">
+                                Choose an image file from your device (max 5MB)
+                              </p>
+                              <div className="relative">
+                                <Input
+                                  id="photoFile"
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={handleFileChange}
+                                  className="cursor-pointer"
+                                />
+                              </div>
+                            </div>
+                            {previewUrl && (
+                              <div className="border-2 border-primary/20 rounded-lg overflow-hidden bg-muted">
+                                <img
+                                  src={previewUrl}
+                                  alt="Preview"
+                                  className="w-full h-64 object-cover"
+                                />
+                                <div className="p-2 bg-primary/5 text-center">
+                                  <p className="text-sm text-muted-foreground">Preview</p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div>
+                            <Label htmlFor="photoUrl" className="text-base font-semibold">Photo URL</Label>
+                            <p className="text-sm text-muted-foreground mb-2">
+                              Enter the URL of the image you want to add to the gallery
+                            </p>
+                            <Input
+                              id="photoUrl"
+                              placeholder="https://example.com/photo.jpg"
+                              value={newPhotoUrl}
+                              onChange={(e) => setNewPhotoUrl(e.target.value)}
+                            />
+                          </div>
+                        )}
+
                         <div>
                           <Label htmlFor="photoCaption" className="text-base font-semibold">Caption (Optional)</Label>
                           <Input
