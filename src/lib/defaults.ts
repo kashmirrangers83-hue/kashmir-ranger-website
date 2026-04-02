@@ -9,7 +9,7 @@ export const defaultSiteSettings: SiteSettings = {
     facebook: 'https://facebook.com/kashmirrangers',
     instagram: 'https://instagram.com/kashmirrangers'
   },
-  playCricketSiteId: '12345',
+  playCricketSiteId: 'https://kashmirrangers.play-cricket.com/Teams/385051',
   playCricketLeagueTableWidget: '',
   playCricketResultsWidget: '',
   playCricketFixturesWidget: ''

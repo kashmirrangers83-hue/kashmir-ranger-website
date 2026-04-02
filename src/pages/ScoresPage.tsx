@@ -5,7 +5,7 @@ import { defaultSiteSettings } from '@/lib/defaults'
 import { Card, CardContent } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Info, Table, Trophy, CalendarBlank } from '@phosphor-icons/react'
+import { Info, Table, Trophy, CalendarBlank, ArrowSquareOut } from '@phosphor-icons/react'
 
 function PlayCricketEmbed({ html, title }: { html: string; title: string }) {
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -38,8 +38,24 @@ export function ScoresPage() {
   const hasResults = settings?.playCricketResultsWidget
   const hasFixtures = settings?.playCricketFixturesWidget
   const hasAnyWidget = hasLeagueTable || hasResults || hasFixtures
-  const hasSiteId = Boolean(siteId)
-  const playCricketBaseUrl = hasSiteId ? `https://www.play-cricket.com/website/${siteId}` : ''
+
+  // Support full URL or bare numeric ID
+  const playCricketBaseUrl = siteId.startsWith('http')
+    ? siteId
+    : siteId ? `https://www.play-cricket.com/website/${siteId}` : ''
+  const hasSiteId = Boolean(playCricketBaseUrl)
+
+  // Derive sub-page URLs - works for both URL formats
+  const teamRootUrl = playCricketBaseUrl
+  const fixturesUrl = playCricketBaseUrl.includes('play-cricket.com/Teams')
+    ? playCricketBaseUrl.replace('/Teams/', '/website_fixture_results/') + '?result_type=fixtures'
+    : `${playCricketBaseUrl}/fixtures`
+  const resultsUrl = playCricketBaseUrl.includes('play-cricket.com/Teams')
+    ? playCricketBaseUrl.replace('/Teams/', '/website_fixture_results/') + '?result_type=results'
+    : `${playCricketBaseUrl}/results`
+  const tableUrl = playCricketBaseUrl.includes('play-cricket.com/Teams')
+    ? 'https://kashmirrangers.play-cricket.com/home'
+    : `${playCricketBaseUrl}/division_tables`
 
   return (
     <div className="min-h-screen py-20">
@@ -118,50 +134,80 @@ export function ScoresPage() {
               )}
             </Tabs>
           ) : hasSiteId ? (
-            <Card>
-              <CardContent className="p-8 space-y-6">
-                <h2 className="text-3xl font-bold uppercase tracking-tight text-primary">
-                  Play-Cricket Dashboard
-                </h2>
-                <p className="text-muted-foreground text-lg">
-                  Quick fallback integration is active using your Play-Cricket site ID. You can still add official widgets in Admin for richer fixtures/results/table views.
-                </p>
-                <div className="flex flex-wrap gap-3">
-                  <a
-                    href={`${playCricketBaseUrl}/fixtures`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block bg-primary text-primary-foreground px-5 py-2 rounded-md font-semibold uppercase tracking-wide hover:bg-primary/90 transition-colors"
-                  >
-                    Fixtures
-                  </a>
-                  <a
-                    href={`${playCricketBaseUrl}/results`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block bg-primary text-primary-foreground px-5 py-2 rounded-md font-semibold uppercase tracking-wide hover:bg-primary/90 transition-colors"
-                  >
-                    Results
-                  </a>
-                  <a
-                    href={`${playCricketBaseUrl}/division_tables`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block bg-primary text-primary-foreground px-5 py-2 rounded-md font-semibold uppercase tracking-wide hover:bg-primary/90 transition-colors"
-                  >
-                    League Table
-                  </a>
-                </div>
-                <div className="rounded-md overflow-hidden border">
-                  <iframe
-                    title="Play-Cricket site"
-                    src={playCricketBaseUrl}
-                    className="w-full min-h-[960px]"
-                    loading="lazy"
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <a
+                  href={fixturesUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group"
+                >
+                  <Card className="h-full hover:border-primary transition-colors cursor-pointer">
+                    <CardContent className="p-6 flex flex-col items-center text-center gap-4">
+                      <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                        <CalendarBlank size={28} weight="bold" className="text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold uppercase tracking-tight text-primary">Fixtures</h3>
+                        <p className="text-muted-foreground text-sm mt-1">Upcoming matches and schedule</p>
+                      </div>
+                      <ArrowSquareOut size={18} className="text-muted-foreground group-hover:text-primary transition-colors" />
+                    </CardContent>
+                  </Card>
+                </a>
+
+                <a
+                  href={resultsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group"
+                >
+                  <Card className="h-full hover:border-primary transition-colors cursor-pointer">
+                    <CardContent className="p-6 flex flex-col items-center text-center gap-4">
+                      <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                        <Trophy size={28} weight="bold" className="text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold uppercase tracking-tight text-primary">Results</h3>
+                        <p className="text-muted-foreground text-sm mt-1">Latest match results and scores</p>
+                      </div>
+                      <ArrowSquareOut size={18} className="text-muted-foreground group-hover:text-primary transition-colors" />
+                    </CardContent>
+                  </Card>
+                </a>
+
+                <a
+                  href={tableUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group"
+                >
+                  <Card className="h-full hover:border-primary transition-colors cursor-pointer">
+                    <CardContent className="p-6 flex flex-col items-center text-center gap-4">
+                      <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                        <Table size={28} weight="bold" className="text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold uppercase tracking-tight text-primary">League Table</h3>
+                        <p className="text-muted-foreground text-sm mt-1">Current standings and points</p>
+                      </div>
+                      <ArrowSquareOut size={18} className="text-muted-foreground group-hover:text-primary transition-colors" />
+                    </CardContent>
+                  </Card>
+                </a>
+              </div>
+
+              <Card className="border-dashed">
+                <CardContent className="p-6 flex items-start gap-4">
+                  <Info size={22} className="text-muted-foreground mt-0.5 shrink-0" />
+                  <p className="text-muted-foreground">
+                    Live widget integration available — paste your Play-Cricket embed codes in the{' '}
+                    <a href="/admin" className="text-primary hover:underline font-medium">Admin Dashboard</a>{' '}
+                    to show fixtures, results and tables directly on this page.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
           ) : (
             <Alert className="max-w-2xl mx-auto">
               <Info size={24} className="text-muted-foreground" />
@@ -174,7 +220,7 @@ export function ScoresPage() {
           {hasSiteId && (
             <div className="text-center pt-12">
               <a
-                href={playCricketBaseUrl}
+                href={teamRootUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block bg-primary text-primary-foreground px-8 py-3 rounded-md font-semibold uppercase tracking-wide hover:bg-primary/90 transition-colors"
