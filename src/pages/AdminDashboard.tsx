@@ -372,17 +372,62 @@ export function AdminDashboard() {
                   </div>
 
                   <div>
-                    <Label htmlFor="siteId" className="text-base font-semibold">Play-Cricket Site ID</Label>
+                    <Label htmlFor="siteId" className="text-base font-semibold">Play-Cricket Club URL</Label>
                     <p className="text-sm text-muted-foreground mt-1 mb-2">
-                      Your club's unique ID from the Play-Cricket URL (e.g., if your URL is play-cricket.com/website/12345, enter "12345")
+                      Your club's Play-Cricket URL (e.g., <code className="bg-muted px-1 rounded">https://kashmirrangers.play-cricket.com</code>)
                     </p>
                     <Input
                       id="siteId"
-                      placeholder="e.g., 12345"
+                      placeholder="https://yourclub.play-cricket.com"
                       value={settings?.playCricketSiteId || ''}
                       onChange={(e) => setSettings((prev) => ({...prev!, playCricketSiteId: e.target.value}))}
                       className="mt-2"
                     />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="teamId" className="text-base font-semibold">Play-Cricket Team ID</Label>
+                    <p className="text-sm text-muted-foreground mt-1 mb-2">
+                      The number from your team page URL (e.g., if URL is <code className="bg-muted px-1 rounded">/Teams/385051</code>, enter <code className="bg-muted px-1 rounded">385051</code>)
+                    </p>
+                    <Input
+                      id="teamId"
+                      placeholder="e.g., 385051"
+                      value={settings?.playCricketTeamId || ''}
+                      onChange={(e) => setSettings((prev) => ({...prev!, playCricketTeamId: e.target.value}))}
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <div className="p-4 bg-primary/5 rounded-md border border-primary/20 space-y-4">
+                    <div>
+                      <h4 className="font-semibold text-primary text-sm">🔴 Live Data via Play-Cricket API (optional)</h4>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Get an API token from <a href="https://play-cricket.com/api_access" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">play-cricket.com/api_access</a> to show live fixtures and results directly on the Scores page.
+                      </p>
+                    </div>
+                    <div>
+                      <Label htmlFor="numericSiteId" className="text-sm font-semibold">Numeric Site ID</Label>
+                      <p className="text-xs text-muted-foreground mt-1 mb-1">Found in Play-Cricket admin or from <code className="bg-muted px-1 rounded">play-cricket.com/api/v2/site_info.json?api_token=TOKEN&domain=yourclub.play-cricket.com</code></p>
+                      <Input
+                        id="numericSiteId"
+                        placeholder="e.g., 12345"
+                        value={settings?.playCricketNumericSiteId || ''}
+                        onChange={(e) => setSettings((prev) => ({...prev!, playCricketNumericSiteId: e.target.value}))}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="apiToken" className="text-sm font-semibold">API Token</Label>
+                      <Input
+                        id="apiToken"
+                        type="password"
+                        placeholder="Paste your Play-Cricket API token"
+                        value={settings?.playCricketApiToken || ''}
+                        onChange={(e) => setSettings((prev) => ({...prev!, playCricketApiToken: e.target.value}))}
+                        className="mt-1"
+                      />
+                    </div>
                   </div>
 
                   <div>

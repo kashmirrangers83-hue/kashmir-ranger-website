@@ -8,6 +8,9 @@ export interface SiteSettings {
     phone?: string
   }
   playCricketSiteId?: string
+  playCricketTeamId?: string
+  playCricketNumericSiteId?: string
+  playCricketApiToken?: string
   playCricketLeagueTableWidget?: string
   playCricketResultsWidget?: string
   playCricketFixturesWidget?: string
