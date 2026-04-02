@@ -4,9 +4,20 @@ import { defaultContent, defaultSiteSettings } from '@/lib/defaults'
 import { Card, CardContent } from '@/components/ui/card'
 import { Trophy, Target, TrendUp } from '@phosphor-icons/react'
 
+interface HeroSettings {
+  backgroundImage: string
+  title: string
+  subtitle: string
+}
+
 export function HomePage() {
   const [content] = useKV<Content>('content', defaultContent)
   const [settings] = useKV<SiteSettings>('site-settings', defaultSiteSettings)
+  const [heroSettings] = useKV<HeroSettings>('hero-settings', {
+    backgroundImage: 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=1600',
+    title: '',
+    subtitle: 'The Ranger Standard: Excellence, Teamwork, Legacy'
+  })
 
   const features = [
     {
@@ -31,17 +42,17 @@ export function HomePage() {
       <section
         className="relative h-[600px] flex items-center justify-center text-white bg-gradient-to-br from-primary via-deep-navy to-primary/80"
         style={{
-          backgroundImage: 'linear-gradient(rgba(28, 58, 94, 0.85), rgba(28, 58, 94, 0.85)), url(https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=1600)',
+          backgroundImage: `linear-gradient(rgba(28, 58, 94, 0.85), rgba(28, 58, 94, 0.85)), url(${heroSettings?.backgroundImage || 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=1600'})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center'
         }}
       >
         <div className="container mx-auto px-4 text-center z-10">
           <h1 className="text-6xl md:text-7xl font-bold uppercase tracking-tight mb-6 animate-fade-up">
-            {settings?.clubName || 'Kashmir Rangers Cricket Club'}
+            {heroSettings?.title || settings?.clubName || 'Kashmir Rangers Cricket Club'}
           </h1>
           <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto font-medium tracking-wide animate-fade-up animation-delay-200">
-            The Ranger Standard: Excellence, Teamwork, Legacy
+            {heroSettings?.subtitle || 'The Ranger Standard: Excellence, Teamwork, Legacy'}
           </p>
           {content?.homeAnnouncement && (
             <Card className="max-w-2xl mx-auto bg-white/95 backdrop-blur-sm border-accent animate-fade-up animation-delay-400">

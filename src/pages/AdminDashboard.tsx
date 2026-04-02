@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useKV } from '@github/spark/hooks'
-import { AuthState, SiteSettings, Content, Official, Sponsor } from '@/types'
+import { SiteSettings, Content, Official, Sponsor } from '@/types'
 import { defaultSiteSettings, defaultContent, defaultOfficials, defaultSponsors } from '@/lib/defaults'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { toast } from 'sonner'
-import { SignOut, Gear, FileText, Users, Star, Info, Image, Plus, Trash, DotsSixVertical } from '@phosphor-icons/react'
+import { SignOut, Gear, FileText, Users, Star, Info, Image as ImageIcon, Plus, Trash, DotsSixVertical, House } from '@phosphor-icons/react'
 
 interface GalleryPhoto {
   id: string
@@ -20,14 +20,26 @@ interface GalleryPhoto {
   uploadedAt: number
 }
 
+interface HeroSettings {
+  backgroundImage: string
+  title: string
+  subtitle: string
+}
+
 export function AdminDashboard() {
-  const [auth, setAuth] = useKV<AuthState>('auth-state', { isAuthenticated: false })
   const [settings, setSettings] = useKV<SiteSettings>('site-settings', defaultSiteSettings)
   const [content, setContent] = useKV<Content>('content', defaultContent)
   const [officials, setOfficials] = useKV<Official[]>('officials', defaultOfficials)
   const [sponsors, setSponsors] = useKV<Sponsor[]>('sponsors', defaultSponsors)
   const [photos, setPhotos] = useKV<GalleryPhoto[]>('gallery-photos', [])
+  const [heroSettings, setHeroSettings] = useKV<HeroSettings>('hero-settings', {
+    backgroundImage: 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=1600',
+    title: '',
+    subtitle: 'The Ranger Standard: Excellence, Teamwork, Legacy'
+  })
   
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
   const [newPhotoUrl, setNewPhotoUrl] = useState('')
   const [newPhotoCaption, setNewPhotoCaption] = useState('')
   const [isAddPhotoOpen, setIsAddPhotoOpen] = useState(false)
@@ -36,13 +48,39 @@ export function AdminDashboard() {
   
   const navigate = useNavigate()
 
-  if (!auth?.isAuthenticated) {
-    navigate('/admin')
+  useEffect(() => {
+    checkAuth()
+  }, [])
+
+  const checkAuth = async () => {
+    try {
+      const user = await window.spark.user()
+      if (user && user.isOwner) {
+        setIsAuthenticated(true)
+      } else {
+        navigate('/admin')
+      }
+    } catch (error) {
+      console.error('Auth check failed:', error)
+      navigate('/admin')
+    } finally {
+      setIsCheckingAuth(false)
+    }
+  }
+
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground">Checking authentication...</p>
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) {
     return null
   }
 
   const handleLogout = () => {
-    setAuth({ isAuthenticated: false })
     toast.success('Logged out successfully')
     navigate('/admin')
   }
@@ -125,8 +163,12 @@ export function AdminDashboard() {
       </nav>
 
       <div className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="settings" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 max-w-4xl">
+        <Tabs defaultValue="homepage" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-6 max-w-5xl">
+            <TabsTrigger value="homepage" className="gap-2">
+              <House size={20} />
+              Homepage
+            </TabsTrigger>
             <TabsTrigger value="settings" className="gap-2">
               <Gear size={20} />
               Settings
@@ -144,10 +186,66 @@ export function AdminDashboard() {
               Sponsors
             </TabsTrigger>
             <TabsTrigger value="gallery" className="gap-2">
-              <Image size={20} />
+              <ImageIcon size={20} />
               Gallery
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="homepage">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-2xl uppercase tracking-wide">Homepage Editor</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-4 p-4 bg-primary/5 rounded-md border border-primary/20">
+                  <h3 className="font-semibold text-lg text-primary">Hero Section</h3>
+                  
+                  <div>
+                    <Label htmlFor="heroBackground" className="text-base font-semibold">Background Image URL</Label>
+                    <p className="text-sm text-muted-foreground mt-1 mb-2">
+                      Enter the URL of the hero background image (recommended: 1600px wide)
+                    </p>
+                    <Input
+                      id="heroBackground"
+                      placeholder="https://example.com/hero-image.jpg"
+                      value={heroSettings?.backgroundImage || ''}
+                      onChange={(e) => setHeroSettings((prev) => ({...prev!, backgroundImage: e.target.value}))}
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="heroTitle" className="text-base font-semibold">Hero Title</Label>
+                    <p className="text-sm text-muted-foreground mt-1 mb-2">
+                      Leave empty to use club name from settings
+                    </p>
+                    <Input
+                      id="heroTitle"
+                      placeholder="Kashmir Rangers Cricket Club"
+                      value={heroSettings?.title || ''}
+                      onChange={(e) => setHeroSettings((prev) => ({...prev!, title: e.target.value}))}
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="heroSubtitle" className="text-base font-semibold">Hero Subtitle</Label>
+                    <Input
+                      id="heroSubtitle"
+                      placeholder="The Ranger Standard: Excellence, Teamwork, Legacy"
+                      value={heroSettings?.subtitle || ''}
+                      onChange={(e) => setHeroSettings((prev) => ({...prev!, subtitle: e.target.value}))}
+                      className="mt-2"
+                    />
+                  </div>
+                </div>
+
+                <Button onClick={() => toast.success('Homepage settings saved!')} className="w-full uppercase tracking-wide font-semibold">
+                  Save Homepage Settings
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="settings">
             <Card>
@@ -543,7 +641,7 @@ export function AdminDashboard() {
                 {(!photos || photos.length === 0) ? (
                   <div className="text-center py-12">
                     <div className="w-24 h-24 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center">
-                      <Image size={48} weight="light" className="text-muted-foreground" />
+                      <ImageIcon size={48} weight="light" className="text-muted-foreground" />
                     </div>
                     <h3 className="text-xl font-bold mb-2">No Photos Yet</h3>
                     <p className="text-muted-foreground mb-4">

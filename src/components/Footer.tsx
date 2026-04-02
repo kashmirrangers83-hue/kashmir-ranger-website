@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useKV } from '@github/spark/hooks'
 import { SiteSettings } from '@/types'
 import { defaultSiteSettings } from '@/lib/defaults'
@@ -6,7 +7,8 @@ import {
   FacebookLogo, 
   InstagramLogo, 
   EnvelopeSimple, 
-  Phone 
+  Phone,
+  LockKey
 } from '@phosphor-icons/react'
 
 export function Footer() {
@@ -52,7 +54,14 @@ export function Footer() {
             </div>
           )}
 
-          <div className="border-t border-white/20 pt-6 w-full text-center">
+          <div className="border-t border-white/20 pt-6 w-full text-center space-y-3">
+            <Link 
+              to="/admin" 
+              className="inline-flex items-center gap-2 text-white/70 hover:text-white transition-colors text-sm font-medium group"
+            >
+              <LockKey size={16} weight="bold" className="group-hover:scale-110 transition-transform" />
+              Admin Login
+            </Link>
             <p className="text-sm text-white/60">
               © {new Date().getFullYear()} {settings.clubName}. All rights reserved.
             </p>

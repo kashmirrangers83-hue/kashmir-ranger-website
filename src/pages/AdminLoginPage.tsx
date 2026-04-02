@@ -1,30 +1,50 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useKV } from '@github/spark/hooks'
-import { AuthState } from '@/types'
-import { ADMIN_CREDENTIALS } from '@/lib/defaults'
 import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { LockKey } from '@phosphor-icons/react'
+import { LockKey, GithubLogo } from '@phosphor-icons/react'
 
 export function AdminLoginPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [, setAuth] = useKV<AuthState>('auth-state', { isAuthenticated: false })
+  const [isLoading, setIsLoading] = useState(false)
+  const [user, setUser] = useState<any>(null)
   const navigate = useNavigate()
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
-      setAuth({ isAuthenticated: true, email })
-      toast.success('Login successful!')
-      navigate('/admin/dashboard')
-    } else {
-      toast.error('Invalid credentials')
+  useEffect(() => {
+    checkAuth()
+  }, [])
+
+  const checkAuth = async () => {
+    try {
+      const currentUser = await window.spark.user()
+      setUser(currentUser)
+      if (currentUser && currentUser.isOwner) {
+        navigate('/admin/dashboard')
+      }
+    } catch (error) {
+      console.error('Auth check failed:', error)
+    }
+  }
+
+  const handleLogin = async () => {
+    setIsLoading(true)
+    try {
+      const currentUser = await window.spark.user()
+      setUser(currentUser)
+      
+      if (currentUser && currentUser.isOwner) {
+        toast.success('Login successful!')
+        navigate('/admin/dashboard')
+      } else if (currentUser && !currentUser.isOwner) {
+        toast.error('Access denied: Only the owner can access the admin panel')
+      } else {
+        toast.error('Authentication failed')
+      }
+    } catch (error) {
+      toast.error('Authentication error')
+      console.error('Login error:', error)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -42,40 +62,32 @@ export function AdminLoginPage() {
             <p className="text-muted-foreground">Admin Panel Login</p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div>
-              <Label htmlFor="email" className="text-base font-semibold">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="mt-2"
-                placeholder={ADMIN_CREDENTIALS.email}
-              />
+          <div className="space-y-6">
+            <div className="p-4 bg-muted/50 rounded-md border border-primary/20">
+              <p className="text-sm text-muted-foreground text-center mb-2">
+                Admin access is restricted to the Spark owner
+              </p>
+              {user && !user.isOwner && (
+                <p className="text-xs text-destructive text-center">
+                  Signed in as {user.login} (not owner)
+                </p>
+              )}
             </div>
-            <div>
-              <Label htmlFor="password" className="text-base font-semibold">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="mt-2"
-                placeholder="Enter password"
-              />
-            </div>
-            <Button type="submit" className="w-full uppercase tracking-wide font-semibold">
-              Login
-            </Button>
-          </form>
 
-          <div className="mt-6 p-4 bg-muted/50 rounded-md">
-            <p className="text-sm text-muted-foreground mb-2">Demo Credentials:</p>
-            <p className="text-sm font-mono">{ADMIN_CREDENTIALS.email}</p>
-            <p className="text-sm font-mono">{ADMIN_CREDENTIALS.password}</p>
+            <Button 
+              onClick={handleLogin} 
+              disabled={isLoading}
+              className="w-full uppercase tracking-wide font-semibold gap-2"
+            >
+              <GithubLogo size={20} weight="fill" />
+              {isLoading ? 'Authenticating...' : 'Login with GitHub'}
+            </Button>
+
+            <div className="mt-6 p-4 bg-primary/5 rounded-md border border-primary/20">
+              <p className="text-xs text-muted-foreground">
+                This admin panel uses secure GitHub authentication. Only the Spark owner can access admin features.
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>
