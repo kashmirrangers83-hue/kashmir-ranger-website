@@ -29,11 +29,11 @@ The application requires Firebase integration, authentication, dynamic CMS capab
 - Success criteria: Dynamic content updates from admin panel, responsive layout, engaging typography
 
 **Scores & Tables Page**
-- Functionality: Embedded Play-Cricket widgets showing league tables and match results
-- Purpose: Provide real-time access to official statistics and match data
+- Functionality: Tabbed interface displaying Play-Cricket widgets for fixtures, results, and league tables
+- Purpose: Provide real-time access to official statistics and match data in an organized, easy-to-navigate format
 - Trigger: Navigation click to /scores
-- Progression: Navigation → Load widget IDs from Firestore → Render Play-Cricket iframes → Display tables
-- Success criteria: Widgets load correctly, admin can update widget IDs, graceful handling if IDs missing
+- Progression: Navigation → Load widget codes from KV store → Render tabbed interface → Display active widgets → Enable tab switching
+- Success criteria: Widgets load correctly, tabs only show for configured widgets, graceful empty state if no widgets configured, responsive iframe rendering
 
 **Officials Page**
 - Functionality: Card-based display of committee members with photos, names, and roles
@@ -66,11 +66,11 @@ The application requires Firebase integration, authentication, dynamic CMS capab
 - Success criteria: Only authenticated users access admin, session persists, logout works
 
 **Site Settings Manager**
-- Functionality: Edit club name, social media links, and Play-Cricket site ID
-- Purpose: Central control of global site configuration
+- Functionality: Edit club name, social media links, Play-Cricket site ID, and widget embed codes with inline help and status indicators
+- Purpose: Central control of global site configuration with user-friendly guidance for non-technical admins
 - Trigger: Click "Site Settings" in admin panel
-- Progression: Load current settings → Display form → Edit fields → Save to Firestore → Success notification
-- Success criteria: Changes reflect immediately on public site, validation prevents invalid URLs
+- Progression: Load current settings → Display form with contextual help → Edit fields → View real-time status indicators → Save to KV store → Success notification
+- Success criteria: Changes reflect immediately on public site, clear instructions for obtaining widget codes, visual confirmation when codes are detected, monospaced font for code fields
 
 **Officials Manager**
 - Functionality: CRUD operations for committee members with photo uploads

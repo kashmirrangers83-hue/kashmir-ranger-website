@@ -10,6 +10,7 @@ export interface SiteSettings {
   playCricketSiteId?: string
   playCricketLeagueTableWidget?: string
   playCricketResultsWidget?: string
+  playCricketFixturesWidget?: string
 }
 
 export interface Official {

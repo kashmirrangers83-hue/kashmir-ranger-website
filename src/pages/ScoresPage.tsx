@@ -3,13 +3,16 @@ import { SiteSettings } from '@/types'
 import { defaultSiteSettings } from '@/lib/defaults'
 import { Card, CardContent } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Info } from '@phosphor-icons/react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Info, Table, Trophy, CalendarBlank } from '@phosphor-icons/react'
 
 export function ScoresPage() {
   const [settings] = useKV<SiteSettings>('site-settings', defaultSiteSettings)
 
   const hasLeagueTable = settings?.playCricketLeagueTableWidget
   const hasResults = settings?.playCricketResultsWidget
+  const hasFixtures = settings?.playCricketFixturesWidget
+  const hasAnyWidget = hasLeagueTable || hasResults || hasFixtures
 
   return (
     <div className="min-h-screen py-20">
@@ -24,36 +27,79 @@ export function ScoresPage() {
           </p>
         </div>
 
-        <div className="max-w-6xl mx-auto space-y-12">
-          {hasLeagueTable && (
-            <Card>
-              <CardContent className="p-8">
-                <h2 className="text-3xl font-bold uppercase tracking-tight text-primary mb-6">
-                  League Table
-                </h2>
-                <div 
-                  className="w-full"
-                  dangerouslySetInnerHTML={{ __html: settings.playCricketLeagueTableWidget }}
-                />
-              </CardContent>
-            </Card>
-          )}
+        <div className="max-w-6xl mx-auto">
+          {hasAnyWidget ? (
+            <Tabs defaultValue={hasFixtures ? 'fixtures' : hasResults ? 'results' : 'table'} className="space-y-8">
+              <TabsList className="grid w-full max-w-2xl mx-auto" style={{ gridTemplateColumns: `repeat(${[hasFixtures, hasResults, hasLeagueTable].filter(Boolean).length}, 1fr)` }}>
+                {hasFixtures && (
+                  <TabsTrigger value="fixtures" className="gap-2">
+                    <CalendarBlank size={20} weight="bold" />
+                    Fixtures
+                  </TabsTrigger>
+                )}
+                {hasResults && (
+                  <TabsTrigger value="results" className="gap-2">
+                    <Trophy size={20} weight="bold" />
+                    Results
+                  </TabsTrigger>
+                )}
+                {hasLeagueTable && (
+                  <TabsTrigger value="table" className="gap-2">
+                    <Table size={20} weight="bold" />
+                    League Table
+                  </TabsTrigger>
+                )}
+              </TabsList>
 
-          {hasResults && (
-            <Card>
-              <CardContent className="p-8">
-                <h2 className="text-3xl font-bold uppercase tracking-tight text-primary mb-6">
-                  Recent Results
-                </h2>
-                <div 
-                  className="w-full"
-                  dangerouslySetInnerHTML={{ __html: settings.playCricketResultsWidget }}
-                />
-              </CardContent>
-            </Card>
-          )}
+              {hasFixtures && (
+                <TabsContent value="fixtures">
+                  <Card>
+                    <CardContent className="p-8">
+                      <h2 className="text-3xl font-bold uppercase tracking-tight text-primary mb-6">
+                        Upcoming Fixtures
+                      </h2>
+                      <div 
+                        className="w-full"
+                        dangerouslySetInnerHTML={{ __html: settings.playCricketFixturesWidget || '' }}
+                      />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              )}
 
-          {!hasLeagueTable && !hasResults && (
+              {hasResults && (
+                <TabsContent value="results">
+                  <Card>
+                    <CardContent className="p-8">
+                      <h2 className="text-3xl font-bold uppercase tracking-tight text-primary mb-6">
+                        Recent Results
+                      </h2>
+                      <div 
+                        className="w-full"
+                        dangerouslySetInnerHTML={{ __html: settings.playCricketResultsWidget || '' }}
+                      />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              )}
+
+              {hasLeagueTable && (
+                <TabsContent value="table">
+                  <Card>
+                    <CardContent className="p-8">
+                      <h2 className="text-3xl font-bold uppercase tracking-tight text-primary mb-6">
+                        League Table
+                      </h2>
+                      <div 
+                        className="w-full"
+                        dangerouslySetInnerHTML={{ __html: settings.playCricketLeagueTableWidget || '' }}
+                      />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              )}
+            </Tabs>
+          ) : (
             <Alert className="max-w-2xl mx-auto">
               <Info size={24} className="text-muted-foreground" />
               <AlertDescription className="text-lg">
@@ -63,7 +109,7 @@ export function ScoresPage() {
           )}
 
           {settings?.playCricketSiteId && (
-            <div className="text-center pt-8">
+            <div className="text-center pt-12">
               <a
                 href={`https://www.play-cricket.com/website/${settings.playCricketSiteId}`}
                 target="_blank"

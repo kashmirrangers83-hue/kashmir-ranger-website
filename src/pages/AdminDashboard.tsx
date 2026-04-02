@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
-import { SignOut, Gear, FileText, Users, Star } from '@phosphor-icons/react'
+import { SignOut, Gear, FileText, Users, Star, Info } from '@phosphor-icons/react'
 
 export function AdminDashboard() {
   const [auth, setAuth] = useKV<AuthState>('auth-state', { isAuthenticated: false })
@@ -141,35 +141,96 @@ export function AdminDashboard() {
                   </div>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-6 p-6 bg-muted/30 rounded-lg border-2 border-primary/10">
+                  <div className="flex items-start gap-3 p-4 bg-primary/5 rounded-md border border-primary/20">
+                    <Info size={24} className="text-primary mt-0.5 flex-shrink-0" weight="bold" />
+                    <div className="space-y-2">
+                      <h3 className="font-semibold text-primary text-base">How to Get Play-Cricket Widget Codes</h3>
+                      <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
+                        <li>Visit your club page at <a href="https://www.play-cricket.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">play-cricket.com</a></li>
+                        <li>Navigate to the section you want to display (League Table or Results)</li>
+                        <li>Look for the "Share" or "Embed" option on that page</li>
+                        <li>Copy the entire embed code (including the <code className="bg-muted px-1 rounded">&lt;iframe&gt;</code> tags)</li>
+                        <li>Paste the code into the appropriate field below</li>
+                      </ol>
+                    </div>
+                  </div>
+
                   <div>
                     <Label htmlFor="siteId" className="text-base font-semibold">Play-Cricket Site ID</Label>
+                    <p className="text-sm text-muted-foreground mt-1 mb-2">
+                      Your club's unique ID from the Play-Cricket URL (e.g., if your URL is play-cricket.com/website/12345, enter "12345")
+                    </p>
                     <Input
                       id="siteId"
+                      placeholder="e.g., 12345"
                       value={settings?.playCricketSiteId || ''}
                       onChange={(e) => setSettings((prev) => ({...prev!, playCricketSiteId: e.target.value}))}
                       className="mt-2"
                     />
                   </div>
+
                   <div>
                     <Label htmlFor="leagueWidget" className="text-base font-semibold">League Table Widget Code</Label>
+                    <p className="text-sm text-muted-foreground mt-1 mb-2">
+                      Paste the complete embed/iframe code from Play-Cricket for your league table
+                    </p>
                     <Textarea
                       id="leagueWidget"
+                      placeholder='<iframe src="..." width="100%" height="400"></iframe>'
                       value={settings?.playCricketLeagueTableWidget || ''}
                       onChange={(e) => setSettings((prev) => ({...prev!, playCricketLeagueTableWidget: e.target.value}))}
-                      rows={3}
-                      className="mt-2"
+                      rows={4}
+                      className="mt-2 font-mono text-xs"
                     />
+                    {settings?.playCricketLeagueTableWidget && (
+                      <div className="mt-2 flex items-center gap-2 text-sm text-success">
+                        <div className="w-2 h-2 bg-success rounded-full"></div>
+                        Widget code detected - will display on Scores page
+                      </div>
+                    )}
                   </div>
+
                   <div>
                     <Label htmlFor="resultsWidget" className="text-base font-semibold">Results Widget Code</Label>
+                    <p className="text-sm text-muted-foreground mt-1 mb-2">
+                      Paste the complete embed/iframe code from Play-Cricket for your recent results
+                    </p>
                     <Textarea
                       id="resultsWidget"
+                      placeholder='<iframe src="..." width="100%" height="400"></iframe>'
                       value={settings?.playCricketResultsWidget || ''}
                       onChange={(e) => setSettings((prev) => ({...prev!, playCricketResultsWidget: e.target.value}))}
-                      rows={3}
-                      className="mt-2"
+                      rows={4}
+                      className="mt-2 font-mono text-xs"
                     />
+                    {settings?.playCricketResultsWidget && (
+                      <div className="mt-2 flex items-center gap-2 text-sm text-success">
+                        <div className="w-2 h-2 bg-success rounded-full"></div>
+                        Widget code detected - will display on Scores page
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="fixturesWidget" className="text-base font-semibold">Fixtures Widget Code</Label>
+                    <p className="text-sm text-muted-foreground mt-1 mb-2">
+                      Paste the complete embed/iframe code from Play-Cricket for your upcoming fixtures
+                    </p>
+                    <Textarea
+                      id="fixturesWidget"
+                      placeholder='<iframe src="..." width="100%" height="400"></iframe>'
+                      value={settings?.playCricketFixturesWidget || ''}
+                      onChange={(e) => setSettings((prev) => ({...prev!, playCricketFixturesWidget: e.target.value}))}
+                      rows={4}
+                      className="mt-2 font-mono text-xs"
+                    />
+                    {settings?.playCricketFixturesWidget && (
+                      <div className="mt-2 flex items-center gap-2 text-sm text-success">
+                        <div className="w-2 h-2 bg-success rounded-full"></div>
+                        Widget code detected - will display on Scores page
+                      </div>
+                    )}
                   </div>
                 </div>
 

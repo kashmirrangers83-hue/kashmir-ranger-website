@@ -11,7 +11,8 @@ export const defaultSiteSettings: SiteSettings = {
   },
   playCricketSiteId: '12345',
   playCricketLeagueTableWidget: '',
-  playCricketResultsWidget: ''
+  playCricketResultsWidget: '',
+  playCricketFixturesWidget: ''
 }
 
 export const defaultContent: Content = {
