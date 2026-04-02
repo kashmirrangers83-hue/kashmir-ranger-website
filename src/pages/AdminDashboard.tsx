@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { toast } from 'sonner'
-import { SignOut, Gear, FileText, Users, Star, Info, Image, Plus, Trash } from '@phosphor-icons/react'
+import { SignOut, Gear, FileText, Users, Star, Info, Image, Plus, Trash, DotsSixVertical } from '@phosphor-icons/react'
 
 interface GalleryPhoto {
   id: string
@@ -31,6 +31,8 @@ export function AdminDashboard() {
   const [newPhotoUrl, setNewPhotoUrl] = useState('')
   const [newPhotoCaption, setNewPhotoCaption] = useState('')
   const [isAddPhotoOpen, setIsAddPhotoOpen] = useState(false)
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
   
   const navigate = useNavigate()
 
@@ -76,6 +78,38 @@ export function AdminDashboard() {
   const handleDeletePhoto = (id: string) => {
     setPhotos((currentPhotos) => (currentPhotos || []).filter(photo => photo.id !== id))
     toast.success('Photo removed from gallery')
+  }
+
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index)
+  }
+
+  const handleDragEnter = (index: number) => {
+    setDragOverIndex(index)
+  }
+
+  const handleDragEnd = () => {
+    if (draggedIndex === null || dragOverIndex === null || draggedIndex === dragOverIndex) {
+      setDraggedIndex(null)
+      setDragOverIndex(null)
+      return
+    }
+
+    setPhotos((currentPhotos) => {
+      const photosCopy = [...(currentPhotos || [])]
+      const draggedPhoto = photosCopy[draggedIndex]
+      photosCopy.splice(draggedIndex, 1)
+      photosCopy.splice(dragOverIndex, 0, draggedPhoto)
+      return photosCopy
+    })
+
+    setDraggedIndex(null)
+    setDragOverIndex(null)
+    toast.success('Photo order updated')
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
   }
 
   return (
@@ -519,12 +553,27 @@ export function AdminDashboard() {
                 ) : (
                   <>
                     <p className="text-muted-foreground mb-6">
-                      Currently displaying {photos.length} photo{photos.length !== 1 ? 's' : ''} in the gallery
+                      Currently displaying {photos.length} photo{photos.length !== 1 ? 's' : ''} in the gallery. Drag and drop to reorder.
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {photos.map((photo) => (
-                        <Card key={photo.id} className="overflow-hidden">
+                      {photos.map((photo, index) => (
+                        <Card 
+                          key={photo.id} 
+                          className={`overflow-hidden cursor-move transition-all duration-200 ${
+                            draggedIndex === index ? 'opacity-50 scale-95' : ''
+                          } ${
+                            dragOverIndex === index && draggedIndex !== index ? 'ring-2 ring-primary' : ''
+                          }`}
+                          draggable
+                          onDragStart={() => handleDragStart(index)}
+                          onDragEnter={() => handleDragEnter(index)}
+                          onDragEnd={handleDragEnd}
+                          onDragOver={handleDragOver}
+                        >
                           <div className="aspect-square relative overflow-hidden bg-muted">
+                            <div className="absolute top-2 left-2 z-10 bg-background/90 backdrop-blur-sm rounded-md p-1.5 shadow-md">
+                              <DotsSixVertical size={20} weight="bold" className="text-muted-foreground" />
+                            </div>
                             <img
                               src={photo.url}
                               alt={photo.caption || 'Gallery photo'}
